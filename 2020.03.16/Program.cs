@@ -48,6 +48,7 @@ public class Trajectory
         trajectory3d = new List<Point3d>();
     }
 
+    // catch exception
     public void BuildTrace3dFromFile(string filePath)
     {
         FileInfo fileInfo = new FileInfo(filePath);
@@ -62,7 +63,7 @@ public class Trajectory
         {
             while (!streamReader.EndOfStream)
             {
-                string[] coordinate = streamReader.ReadLine().Split(',');
+                string[] coordinate = streamReader.ReadLine().Split(','); // data reading error, not required format
                 double x = double.Parse(coordinate[0]);
                 double y = double.Parse(coordinate[1]);
                 double z = double.Parse(coordinate[2]);
@@ -71,6 +72,7 @@ public class Trajectory
         }
     }
 
+    // if the first point is not original point ????
     public char[,] BuildMatrix(double step, int dimension1, int dimension2)
     {
         double maxDimension1 = 0;
@@ -114,7 +116,7 @@ public class Trajectory
                 text += trajectory3d[i][j].ToString("F2");
                 text += ' ';
             }
-            for (int j = 0; j < text.Length; j++)
+            for (int j = 0; j < text.Length; j++)  // if text is out of border of figure
             {
                 matrix2d[trajectory2d[i][0] + 1 + j, trajectory2d[i][1]] = text[j];
             }
@@ -167,7 +169,7 @@ public class Trajectory
             int sign1 = (trajectory2d[i][0] > trajectory2d[i - 1][0]) ? 1 : -1;
             int sign2 = (trajectory2d[i][1] > trajectory2d[i - 1][1]) ? 1 : -1;
             int[] sign = new int[] { sign1, sign2 };
-            int[] newPsition = new int[2] { trajectory2d[i - 1][0], trajectory2d[i - 1][1] };
+            int[] newPosition = new int[2] { trajectory2d[i - 1][0], trajectory2d[i - 1][1] };
             double k = (double)(trajectory2d[i][1] - trajectory2d[i - 1][1]) / (double)(trajectory2d[i][0] - trajectory2d[i - 1][0]);
             int primaryDirection = 0;
             int secondaryDirection = 1;
@@ -186,14 +188,14 @@ public class Trajectory
             while (stepNumber > 0)
             {
                 stepNumber -= 1;
-                newPsition[primaryDirection] += sign[primaryDirection];
+                newPosition[primaryDirection] += sign[primaryDirection];
                 d += step * Math.Abs(k);
                 if (d >= step)
                 {
                     d -= step;
-                    newPsition[secondaryDirection] += sign[secondaryDirection];
+                    newPosition[secondaryDirection] += sign[secondaryDirection];
                 }
-                passingGrids.Add(new int[] { newPsition[0], newPsition[1] });
+                passingGrids.Add(new int[] { newPosition[0], newPosition[1] });
             }
             passingGrids.Add(new int[] { trajectory2d[i][0], trajectory2d[i][1] });
             FillPath(matrix2d, passingGrids);
