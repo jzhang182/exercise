@@ -78,7 +78,7 @@ public class Trajectory
             for (int j = 0; j < 3; j++)
             {
                 text += Math.Round(trajectory3d[i][j], 1).ToString("F1");
-                text += (j == 2) ? "," : "";
+                text += (j == 2) ? "" : ",";
             }
             matrix2d[trajectory2d[i][0] + 1, trajectory2d[i][1] + 1] = '(';
             for (int j = 0; j < text.Length; j++)  // if text is out of border of figure
