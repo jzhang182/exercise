@@ -49,9 +49,10 @@ public class Trajectory
     }
 
     // catch exception
-    public void BuildTrace3dFromFile(string filePath)
+    public void BuildTrace3dFromFile(int number)
     {
-        FileInfo fileInfo = new FileInfo(filePath);
+        string fileName = number.ToString() + ".txt";
+        FileInfo fileInfo = new FileInfo(fileName);
         if (!fileInfo.Exists)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -59,7 +60,7 @@ public class Trajectory
             Console.ResetColor();
             return;
         }
-        using (StreamReader streamReader = new StreamReader(filePath, System.Text.Encoding.Default))
+        using (StreamReader streamReader = new StreamReader(fileName, System.Text.Encoding.Default))
         {
             while (!streamReader.EndOfStream)
             {
@@ -110,16 +111,18 @@ public class Trajectory
         for (int i = 0; i < trajectory3d.Count; i++)
         {
             matrix2d[trajectory2d[i][0], trajectory2d[i][1]] = '+';
-            string text = new string(" ");
+            string text = new string("");
             for (int j = 0; j < 3; j++)
             {
                 text += Math.Round(trajectory3d[i][j], 1).ToString("F1");
-                text += ' ';
+                text += (j == 2) ? "," : "";
             }
+            matrix2d[trajectory2d[i][0] + 1, trajectory2d[i][1] + 1] = '(';
             for (int j = 0; j < text.Length; j++)  // if text is out of border of figure
             {
-                matrix2d[trajectory2d[i][0] + 1, trajectory2d[i][1] + j + 2] = text[j];
+                matrix2d[trajectory2d[i][0] + j + 2, trajectory2d[i][1] + 1] = text[j];
             }
+            matrix2d[trajectory2d[i][0] + text.Length + 2, trajectory2d[i][1] + 1] = ')';
         }
         matrix2d[trajectory2d[0][0], trajectory2d[0][1]] = '=';
         matrix2d[trajectory2d[trajectory3d.Count - 1][0], trajectory2d[trajectory3d.Count - 1][1]] = '#';
@@ -182,7 +185,7 @@ public class Trajectory
                 secondaryDirection = 0;
                 k = 1 / k;
             }
-            double d = 0.5 * step * k;
+            double d = 0.5 * step + 0.5 * step * k;
             if (sign[secondaryDirection] < 0)
             {
                 d = step - d;
@@ -238,36 +241,36 @@ public class Trajectory
         }
     }
 
-    public void ViewVertical(double step, string filename, int number)
+    public void ViewVertical(double step, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 0, 1);
-        OutputMatrix(matrix2d, number.ToString() + filename);
+        OutputMatrix(matrix2d, number.ToString() + "Vertical.txt");
     }
 
-    public void ViewFront(double step, string filename, int number)
+    public void ViewFront(double step, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 0, 2);
-        OutputMatrix(matrix2d, number.ToString() + filename);
+        OutputMatrix(matrix2d, number.ToString() + "Front.txt");
     }
 
-    public void ViewSide(double step, string filename, int number)
+    public void ViewSide(double step, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 1, 2);
-        OutputMatrix(matrix2d, number.ToString() + filename);
+        OutputMatrix(matrix2d, number.ToString() + "Side.txt");
     }
 
     public void View(double step, int number)
     {
-        ViewVertical(step, "Vertical.txt", number);
-        ViewFront(step, "Front.txt", number);
-        ViewSide(step, "Side.txt", number);
+        ViewVertical(step, number);
+        ViewFront(step, number);
+        ViewSide(step, number);
     }
-
 
     public static void Main()
     {
         Trajectory test = new Trajectory();
-        test.BuildTrace3dFromFile("3.txt");
-        test.View(3.28, 3);
+        int number = 8;
+        test.BuildTrace3dFromFile(number);
+        test.View(3.28, number);
     }
 }
