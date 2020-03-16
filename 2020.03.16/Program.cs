@@ -48,6 +48,7 @@ public class Trajectory
         trajectory3d = new List<Point3d>();
     }
 
+    // catch exception
     public void BuildTrace3dFromFile(string filePath)
     {
         FileInfo fileInfo = new FileInfo(filePath);
@@ -62,7 +63,7 @@ public class Trajectory
         {
             while (!streamReader.EndOfStream)
             {
-                string[] coordinate = streamReader.ReadLine().Split(',');
+                string[] coordinate = streamReader.ReadLine().Split(','); // data reading error, not required format
                 double x = double.Parse(coordinate[0]);
                 double y = double.Parse(coordinate[1]);
                 double z = double.Parse(coordinate[2]);
@@ -71,6 +72,7 @@ public class Trajectory
         }
     }
 
+    // if the first point is not original point ????
     public char[,] BuildMatrix(double step, int dimension1, int dimension2)
     {
         double maxDimension1 = trajectory3d[0][dimension1];
@@ -114,7 +116,7 @@ public class Trajectory
                 text += Math.Round(trajectory3d[i][j], 1).ToString("F1");
                 text += ' ';
             }
-            for (int j = 0; j < text.Length; j++)
+            for (int j = 0; j < text.Length; j++)  // if text is out of border of figure
             {
                 matrix2d[trajectory2d[i][0], trajectory2d[i][1] + 1 + j] = text[j];
             }
