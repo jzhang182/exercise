@@ -73,10 +73,10 @@ public class Trajectory
 
     public char[,] BuildMatrix(double step, int dimension1, int dimension2)
     {
-        double maxDimension1 = 0;
-        double minDimension1 = 0;
-        double maxDimension2 = 0;
-        double minDimension2 = 0;
+        double maxDimension1 = trajectory3d[0][dimension1];
+        double minDimension1 = trajectory3d[0][dimension1];
+        double maxDimension2 = trajectory3d[0][dimension2];
+        double minDimension2 = trajectory3d[0][dimension2];
         for (int i = 1; i < trajectory3d.Count; i++)
         {
             maxDimension1 = (trajectory3d[i][dimension1] > maxDimension1) ? trajectory3d[i][dimension1] : maxDimension1;
@@ -111,14 +111,16 @@ public class Trajectory
             string text = new string(" ");
             for (int j = 0; j < 3; j++)
             {
-                text += trajectory3d[i][j].ToString("F2");
+                text += Math.Round(trajectory3d[i][j], 1).ToString("F1");
                 text += ' ';
             }
             for (int j = 0; j < text.Length; j++)
             {
-                matrix2d[trajectory2d[i][0] + 1 + j, trajectory2d[i][1]] = text[j];
+                matrix2d[trajectory2d[i][0], trajectory2d[i][1] + 1 + j] = text[j];
             }
         }
+        matrix2d[trajectory2d[0][0], trajectory2d[0][1]] = '=';
+        matrix2d[trajectory2d[trajectory3d.Count - 1][0], trajectory2d[trajectory3d.Count - 1][1]] = '#';
     }
 
     public void OutputMatrix(char[,] matrix2d, string filename)
@@ -150,6 +152,7 @@ public class Trajectory
             {
                 continue;
             }
+
             if (trajectory2d[i][0] == trajectory2d[i - 1][0])
             {
                 int sign0 = (trajectory2d[i][1] > trajectory2d[i - 1][1]) ? 1 : -1;
@@ -167,7 +170,7 @@ public class Trajectory
             int sign1 = (trajectory2d[i][0] > trajectory2d[i - 1][0]) ? 1 : -1;
             int sign2 = (trajectory2d[i][1] > trajectory2d[i - 1][1]) ? 1 : -1;
             int[] sign = new int[] { sign1, sign2 };
-            int[] newPsition = new int[2] { trajectory2d[i - 1][0], trajectory2d[i - 1][1] };
+            int[] newPosition = new int[2] { trajectory2d[i - 1][0], trajectory2d[i - 1][1] };
             double k = (double)(trajectory2d[i][1] - trajectory2d[i - 1][1]) / (double)(trajectory2d[i][0] - trajectory2d[i - 1][0]);
             int primaryDirection = 0;
             int secondaryDirection = 1;
@@ -186,14 +189,14 @@ public class Trajectory
             while (stepNumber > 0)
             {
                 stepNumber -= 1;
-                newPsition[primaryDirection] += sign[primaryDirection];
+                newPosition[primaryDirection] += sign[primaryDirection];
                 d += step * Math.Abs(k);
                 if (d >= step)
                 {
                     d -= step;
-                    newPsition[secondaryDirection] += sign[secondaryDirection];
+                    newPosition[secondaryDirection] += sign[secondaryDirection];
                 }
-                passingGrids.Add(new int[] { newPsition[0], newPsition[1] });
+                passingGrids.Add(new int[] { newPosition[0], newPosition[1] });
             }
             passingGrids.Add(new int[] { trajectory2d[i][0], trajectory2d[i][1] });
             FillPath(matrix2d, passingGrids);
