@@ -118,7 +118,7 @@ public class Trajectory
             }
             for (int j = 0; j < text.Length; j++)  // if text is out of border of figure
             {
-                matrix2d[trajectory2d[i][0], trajectory2d[i][1] + 1 + j] = text[j];
+                matrix2d[trajectory2d[i][0] + 1, trajectory2d[i][1] + j + 2] = text[j];
             }
         }
         matrix2d[trajectory2d[0][0], trajectory2d[0][1]] = '=';
@@ -238,30 +238,36 @@ public class Trajectory
         }
     }
 
-    public void ViewVertical(double step, string filename)
+    public void ViewVertical(double step, string filename, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 0, 1);
-        OutputMatrix(matrix2d, filename);
+        OutputMatrix(matrix2d, number.ToString() + filename);
     }
 
-    public void ViewFront(double step, string filename)
+    public void ViewFront(double step, string filename, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 0, 2);
-        OutputMatrix(matrix2d, filename);
+        OutputMatrix(matrix2d, number.ToString() + filename);
     }
 
-    public void ViewSide(double step, string filename)
+    public void ViewSide(double step, string filename, int number)
     {
         char[,] matrix2d = BuildMatrix(step, 1, 2);
-        OutputMatrix(matrix2d, filename);
+        OutputMatrix(matrix2d, number.ToString() + filename);
     }
+
+    public void View(double step, int number)
+    {
+        ViewVertical(step, "Vertical.txt", number);
+        ViewFront(step, "Front.txt", number);
+        ViewSide(step, "Side.txt", number);
+    }
+
 
     public static void Main()
     {
         Trajectory test = new Trajectory();
         test.BuildTrace3dFromFile("3.txt");
-        test.ViewVertical(3.28, "Vertical.txt");
-        test.ViewFront(3.28, "Front.txt");
-        test.ViewSide(3.28, "Side.txt");
+        test.View(3.28, 3);
     }
 }
