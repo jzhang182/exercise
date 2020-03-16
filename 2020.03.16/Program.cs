@@ -258,8 +258,8 @@ public class Trajectory
     {
         Trajectory test = new Trajectory();
         test.BuildTrace3dFromFile("3.txt");
-        test.ViewVertical(5, "Vertical.txt");
-        test.ViewFront(5, "Front.txt");
-        test.ViewSide(5, "Side.txt");
+        test.ViewVertical(3.28, "Vertical.txt");
+        test.ViewFront(3.28, "Front.txt");
+        test.ViewSide(3.28, "Side.txt");
     }
 }
