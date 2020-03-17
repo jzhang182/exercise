@@ -14,7 +14,7 @@ public class Trajectory
     // catch exception
     public void BuildTrace3dFromFile(int number)
     {
-        string fileName = number.ToString() + ".txt";
+        string fileName = number.ToString() + ".csv";
         FileInfo fileInfo = new FileInfo(fileName);
         if (!fileInfo.Exists)
         {
@@ -37,7 +37,7 @@ public class Trajectory
     }
 
     // if the first point is not original point ????
-    public char[,] BuildMatrix(double step, int dimension1, int dimension2)
+    public char[,] BuildMatrix(double step, int dimension1, int dimension2, string unitOption)
     {
         double maxDimension1 = trajectory3d[0][dimension1];
         double minDimension1 = trajectory3d[0][dimension1];
@@ -64,20 +64,22 @@ public class Trajectory
             int position2 = originPosition2 + (int)Math.Floor((trajectory3d[i][dimension2] - trajectory3d[0][dimension2]) / step);
             trajectory2d.Add(new Point2d(position1, position2));
         }
-        FillPoints(matrix2d, trajectory2d);
+        FillPoints(matrix2d, trajectory2d, unitOption);
         FindPassingGrids(matrix2d, trajectory2d, step);
         return matrix2d;
     }
 
-    public void FillPoints(char[,] matrix2d, List<Point2d> trajectory2d)
+    public void FillPoints(char[,] matrix2d, List<Point2d> trajectory2d, string unitOption)
     {
+        const double meterToFeetRatio = 3.2808399;
+        double ratio = unitOption.Equals("feet") ? meterToFeetRatio : 1.0;
         for (int i = 0; i < trajectory3d.Count; i++)
         {
             matrix2d[trajectory2d[i][0], trajectory2d[i][1]] = '+';
             string text = new string("");
             for (int j = 0; j < 3; j++)
             {
-                text += Math.Round(trajectory3d[i][j], 1).ToString("F1");
+                text += Math.Round(trajectory3d[i][j] * ratio, 1).ToString("F1");
                 text += (j == 2) ? "" : ",";
             }
             matrix2d[trajectory2d[i][0] + 1, trajectory2d[i][1] + 1] = '(';
@@ -89,6 +91,27 @@ public class Trajectory
         }
         matrix2d[trajectory2d[0][0], trajectory2d[0][1]] = '=';
         matrix2d[trajectory2d[trajectory3d.Count - 1][0], trajectory2d[trajectory3d.Count - 1][1]] = '#';
+        SpotInflectionPoint(matrix2d, trajectory2d);
+    }
+
+    public void SpotInflectionPoint(char[,] matrix2d, List<Point2d> trajectory2d)
+    {
+        int maxCosineIndex = 0;//calculate sharpest inflection point
+        double maxCosine = -1.0;
+        double vector1X, vector1Y, vector2X, vector2Y;
+        for (int i = 1; i < trajectory3d.Count - 1; i++)
+        {
+            vector1X = trajectory2d[i - 1][0] - trajectory2d[i][0];
+            vector1Y = trajectory2d[i - 1][1] - trajectory2d[i][1];
+            vector2X = trajectory2d[i + 1][0] - trajectory2d[i][0];
+            vector2Y = trajectory2d[i + 1][1] - trajectory2d[i][1];
+            double cosine = (vector1X * vector2X + vector1Y * vector1X) / (Math.Sqrt(vector1X * vector1X + vector1Y * vector1Y) * Math.Sqrt(vector2X * vector2X + vector2Y * vector2Y));
+            if (maxCosine < cosine)
+            {
+                maxCosineIndex = i; maxCosine = cosine;
+            }
+        }
+        matrix2d[trajectory2d[maxCosineIndex][0], trajectory2d[maxCosineIndex][1]] = 'o';
     }
 
     public void OutputMatrix(char[,] matrix2d, string filename)
@@ -204,36 +227,38 @@ public class Trajectory
         }
     }
 
-    public void ViewVertical(double step, int number)
+    public void ViewVertical(double step, int number, string unitOption)
     {
-        char[,] matrix2d = BuildMatrix(step, 0, 1);
+        char[,] matrix2d = BuildMatrix(step, 0, 1, unitOption);
         OutputMatrix(matrix2d, number.ToString() + "Vertical.txt");
     }
 
-    public void ViewFront(double step, int number)
+    public void ViewFront(double step, int number, string unitOption)
     {
-        char[,] matrix2d = BuildMatrix(step, 0, 2);
+        char[,] matrix2d = BuildMatrix(step, 0, 2, unitOption);
         OutputMatrix(matrix2d, number.ToString() + "Front.txt");
     }
 
-    public void ViewSide(double step, int number)
+    public void ViewSide(double step, int number, string unitOption)
     {
-        char[,] matrix2d = BuildMatrix(step, 1, 2);
+        char[,] matrix2d = BuildMatrix(step, 1, 2, unitOption);
         OutputMatrix(matrix2d, number.ToString() + "Side.txt");
     }
 
-    public void View(double step, int number)
+    public void View(double step, int number, string unitOption)
     {
-        ViewVertical(step, number);
-        ViewFront(step, number);
-        ViewSide(step, number);
+        ViewVertical(step, number, unitOption);
+        ViewFront(step, number, unitOption);
+        ViewSide(step, number, unitOption);
     }
 
     public static void Main()
     {
         Trajectory test = new Trajectory();
-        int number = 8;
+        int number = 5;
         test.BuildTrace3dFromFile(number);
-        test.View(3.28, number);
+        Console.WriteLine("Please enter display unit(default meter): meter/feet");
+        string unitOption = Console.ReadLine();
+        test.View(3.28, number, unitOption);
     }
 }
